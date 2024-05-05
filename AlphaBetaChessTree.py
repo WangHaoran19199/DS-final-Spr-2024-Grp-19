@@ -1,6 +1,6 @@
 from TreeNode import TreeNode
 import chess
-abcdefg
+
 class AlphaBetaChessTree:
     def __init__(self, fen):
         """
@@ -10,9 +10,9 @@ class AlphaBetaChessTree:
         """
         
         fenstr=fen
-        rboard=chess.Board(fen=fenstr)
-        print(rboard)
-        root=TreeNode(rboard,0)
+        self.rboard=chess.Board(fen=fenstr)
+        
+        self.root=TreeNode(self.rboard,0)
 
     @staticmethod
     def get_supported_evaluations():
@@ -29,7 +29,8 @@ class AlphaBetaChessTree:
         :param node: The game state to which the move is applied.
         :param notation: The notation system used for the move (default: "SAN" - Standard Algebraic Notation).
         """
-        node._board.push_san(move)
+        if notation=="SAN":
+            node._board.push_san(move)
         return
 
     def _get_legal_moves(self, node, notation="SAN"):
