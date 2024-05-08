@@ -57,10 +57,10 @@ class AlphaBetaChessTree:
         :return: The best next move in the format defined by the variable notation.
         """
         best_move=""
-        best_score=-1000000000
+        best_score= float("-inf")
         for move in self._get_legal_moves(node):
             self._apply_move(move, node)
-            score=self._alpha_beta(node, depth, -1000000000, 1000000000, False)
+            score=self._alpha_beta(node, depth, float("-inf"), float('inf'), False)
             if score>best_score:
                 best_score=score
                 best_move=move
@@ -159,7 +159,7 @@ class AlphaBetaChessTree:
         :param board: The board to visualize.
         :return: A visual representation of the board.
         """
-        pass
+        
 
     def visualize_decision_process(self, depth, move, notation="SAN"):
         """
