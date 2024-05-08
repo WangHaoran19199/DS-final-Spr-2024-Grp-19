@@ -50,7 +50,15 @@ class AlphaBetaChessTree:
         :param notation: The notation system for the move (default: "SAN").
         :return: The best next move in the format defined by the variable notation.
         """
-        pass
+        best_move=""
+        best_score=-1000000000
+        for move in self._get_legal_moves(node):
+            self._apply_move(move, node)
+            score=self._alpha_beta(node, depth, -1000000000, 1000000000, False)
+            if score>best_score:
+                best_score=score
+                best_move=move
+        return best_move
 
     def _alpha_beta(self, node, depth, alpha, beta, maximizing_player):
         """
