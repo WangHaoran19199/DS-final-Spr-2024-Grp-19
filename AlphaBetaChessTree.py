@@ -9,10 +9,10 @@ class AlphaBetaChessTree:
         :param fen: A string representing the chess board in FEN format.
         """
         #white moves first and is maximizing player, black is the opposite
-        fenstr=fen
-        self.rboard=chess.Board(fen=fenstr)
         
-        self.root=TreeNode(self.rboard,0)
+        self.rboard=chess.Board(fen)
+        
+        self.root=TreeNode(self.rboard,1) #1 or white turn, 0 for black turn
 
     @staticmethod
     def get_supported_evaluations():
@@ -31,6 +31,8 @@ class AlphaBetaChessTree:
         """
         if notation=="SAN":
             node._board.push_san(move)
+        elif notation=="UCI":
+            node._board.push_uci(move)
         return
 
     def _get_legal_moves(self, node, notation="SAN"):
@@ -40,7 +42,11 @@ class AlphaBetaChessTree:
         :param notation: The notation system used for the moves (default: "SAN").
         :return: A list of strings representing all legal moves for a given node.
         """
-        return node._board.legal_moves
+        moves=list(node._board.legal_moves)
+        res=[]
+        for i in moves:
+            res.append(i.uci())
+        return res
 
     def get_best_next_move(self, node, depth, notation="SAN"):
         """
@@ -62,9 +68,26 @@ class AlphaBetaChessTree:
         :param maximizing_player: Boolean indicating if the current player is maximizing or minimizing the score.
         :return: The best score for the current player.
         """
-        if maximizing_player:
+        if depth==0:
+            return self._evaluate_position(node,0)
 
-        else:
+        node._score=self._evaluate_position(node,0)
+        
+        if maximizing_player: #white turn
+            if node._board._is_checkmate() or node._board.is_stalemate() or node._board.is_insufficient_material():
+                return self._evaluate_position(node,0)
+            else:
+                for i in self._get_legal_moves(node):
+                    new_board=chess.Board(node._board.fen())
+                    res=TreeNode(new_board,1-node._turn)
+                    self._apply_move(i,res,"UCI")
+                    node._children.append(res)
+
+
+
+
+        else:  #black turn
+            pass
 
     def _evaluate_position(self, node, depth):
         """
