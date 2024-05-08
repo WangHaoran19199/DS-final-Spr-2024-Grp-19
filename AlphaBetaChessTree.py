@@ -8,7 +8,7 @@ class AlphaBetaChessTree:
         The board state is represented in FEN (Forsyth-Edwards Notation) format.
         :param fen: A string representing the chess board in FEN format.
         """
-        
+        #white moves first and is maximizing player, black is the opposite
         fenstr=fen
         self.rboard=chess.Board(fen=fenstr)
         
@@ -62,7 +62,9 @@ class AlphaBetaChessTree:
         :param maximizing_player: Boolean indicating if the current player is maximizing or minimizing the score.
         :return: The best score for the current player.
         """
-        pass
+        if maximizing_player:
+
+        else:
 
     def _evaluate_position(self, node, depth):
         """
@@ -71,7 +73,8 @@ class AlphaBetaChessTree:
         :param depth: The depth of the node in the game tree.
         :return: An evaluation score for the position.
         """
-        pass
+        res=self._evaluate_board(node._board)
+        return res-depth*2
 
     def _evaluate_board(self, board):
         """
@@ -79,7 +82,45 @@ class AlphaBetaChessTree:
         :param board: The board to evaluate.
         :return: An evaluation score for the board.
         """
-        pass
+        pieces={"wpawn":0, "wknight":0, "wbishop":0, "wrook":0, "wqueen":0, "wking":0,
+                "bpawn":0, "bknight":0, "bbishop":0, "brook":0, "bqueen":0, "bking":0}
+        fenstr=board.fen()
+        for i in fenstr:
+            if i==" ":
+                break
+            elif i.isalpha():
+                if i=="P":
+                    pieces["wpawn"]+=1
+                elif i=="N":
+                    pieces["wknight"]+=1
+                elif i=="B":
+                    pieces["wbishop"]+=1
+                elif i=="R":
+                    pieces["wrook"]+=1
+                elif i=="Q":
+                    pieces["wqueen"]+=1
+                elif i=="K":
+                    pieces["wking"]+=1
+
+                if i=="p":
+                    pieces["bpawn"]+=1
+                elif i=="n":
+                    pieces["bknight"]+=1
+                elif i=="b":
+                    pieces["bbishop"]+=1
+                elif i=="r":
+                    pieces["brook"]+=1
+                elif i=="q":
+                    pieces["bqueen"]+=1
+                elif i=="k":
+                    pieces["bking"]+=1
+            
+            res=pieces["wpawn"]+pieces["wknight"]*3+pieces["wbishop"]*3+pieces["wrook"]*5+pieces["wqueen"]*9+pieces["wking"]*39
+            -pieces["bpawn"]-pieces["bknight"]*3-pieces["bbishop"]*3-pieces["brook"]*5-pieces["bqueen"]*9-pieces["bking"]*39
+            return res
+
+                                    
+
 
     def get_board_visualization(self, board):
         """
