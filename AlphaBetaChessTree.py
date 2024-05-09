@@ -59,8 +59,8 @@ class AlphaBetaChessTree:
         best_move=""
         best_score= float("-inf")
         for move in self._get_legal_moves(node):
-            self._apply_move(move, node,"UCI")
-            score=self._alpha_beta(node, depth, float("-inf"), float('inf'), False)
+            next = self._apply_move(move, node)
+            score=self._alpha_beta(node , depth, float("-inf"), float('inf'), False)
             if score>best_score:
                 best_score=score
                 best_move=move
