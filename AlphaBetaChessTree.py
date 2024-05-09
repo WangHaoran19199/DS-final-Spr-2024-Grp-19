@@ -9,10 +9,9 @@ class AlphaBetaChessTree:
         :param fen: A string representing the chess board in FEN format.
         """
         #white moves first and is maximizing player, black is the opposite
-        
+        self.fenstr=fen
         self.rboard=chess.Board(fen)
-        
-        self.root=TreeNode(self.rboard,1) #1 or white turn, 0 for black turn
+        self.root=TreeNode(self.rboard,True) #T for white turn, F for black turn
 
     @staticmethod
     def get_supported_evaluations():
@@ -20,7 +19,7 @@ class AlphaBetaChessTree:
         Static method that returns a list of supported evaluation methods.
         :return: A list of strings containing supported evaluation methods.
         """
-        pass
+        return ["alpha-beta pruning"]
 
     def _apply_move(self, move, node, notation="SAN"):
         """
@@ -48,7 +47,7 @@ class AlphaBetaChessTree:
             res.append(i.uci())
         return res
 
-    def get_best_next_move(self, node, depth, notation="SAN"):
+    def get_best_next_move(self, node, depth, notation="SAN"):  
         """
         Determines the best next move for the current player using the Alpha-Beta pruning algorithm.
         :param node: The current game state.
@@ -56,15 +55,20 @@ class AlphaBetaChessTree:
         :param notation: The notation system for the move (default: "SAN").
         :return: The best next move in the format defined by the variable notation.
         """
-        best_move=""
-        best_score= float("-inf")
-        for move in self._get_legal_moves(node):
-            self._apply_move(move, node,"UCI")
-            score=self._alpha_beta(node, depth, float("-inf"), float('inf'), False)
-            if score>best_score:
-                best_score=score
-                best_move=move
-        return best_move
+        turn=None
+        for i in range(len(node)):
+            if node[i]==" ":
+                if node[i+1]=="w":
+                    turn=True
+                    break
+                elif node[i+1]=="b":
+                    turn=False
+                    break
+                else:
+                    raise Exception("FEN Bug occurred in get_next_best_move!")
+                
+        root=TreeNode(chess.Board(node),turn)
+        return self._alpha_beta(root,depth,float("-inf"),float("inf"),turn)[1]
 
     def _alpha_beta(self, node, depth, alpha, beta, maximizing_player):
         """
@@ -76,28 +80,57 @@ class AlphaBetaChessTree:
         :param maximizing_player: Boolean indicating if the current player is maximizing or minimizing the score.
         :return: The best score for the current player.
         """
-        if depth==0:
-            return self._evaluate_position(node,0)
+        node._score=self._evaluate_position(node,depth)
 
-        node._score=self._evaluate_position(node,0)
-        
+        if depth==0 or node._board.is_checkmate() or node._board.is_stalemate() or node._board.is_insufficient_material(): #base case
+            return [self._evaluate_position(node,0),None]
+
         if maximizing_player: #white turn
-            if node._board._is_checkmate() or node._board.is_stalemate() or node._board.is_insufficient_material():
-                return self._evaluate_position(node,0)
-            else:
-                for i in self._get_legal_moves(node):
-                    new_board=chess.Board(node._board.fen())
-                    res=TreeNode(new_board,1-node._turn)
-                    self._apply_move(i,res,"UCI")
-                    node._children.append(res)
+            for i in self._get_legal_moves(node):
+                
+                new_board=chess.Board(node._board.fen())
+                res=TreeNode(new_board,not(node._turn))
+                self._apply_move(i,res,"UCI")
+                node._children.append([res,i])
 
-
-
+            maxscore=float("-inf")
+            move=None
+            for i in node._children:
+                nd,mv=i[0],i[1]
+                nextscore=self._alpha_beta(nd,depth-1,alpha,beta,not(maximizing_player))[0]
+                if nextscore>maxscore:
+                    maxscore=nextscore
+                    move=mv
+                #maxscore=max(maxscore,nextscore)
+                alpha=max(alpha,nextscore)
+                if beta<=alpha:
+                    break
+            return [maxscore,move]
 
         else:  #black turn
-            pass
+            for i in self._get_legal_moves(node):
+                
+                new_board=chess.Board(node._board.fen())
+                res=TreeNode(new_board,not(node._turn))
+                self._apply_move(i,res,"UCI")
+                node._children.append([res,i])
 
-    def _evaluate_position(self, node, depth):
+            minscore=float("inf")
+            move=None
+            for i in node._children:
+                nd,mv=i[0],i[1]
+                nextscore=self._alpha_beta(nd,depth-1,alpha,beta,not(maximizing_player))[0]
+                if nextscore<minscore:
+                    minscore=nextscore
+                    move=mv
+                #minscore=min(minscore,nextscore)
+                beta=min(beta,nextscore)
+                if beta<=alpha:
+                    break
+            print(minscore)
+            return [minscore,move]
+
+    def _evaluate_position(self, node, depth): 
         """
         Evaluates the position at a given node, taking into account the depth of the node in the decision tree.
         :param node: The game state to evaluate.
@@ -105,7 +138,7 @@ class AlphaBetaChessTree:
         :return: An evaluation score for the position.
         """
         res=self._evaluate_board(node._board)
-        return res-depth*2
+        return res+depth*2 
 
     def _evaluate_board(self, board):
         """
@@ -146,9 +179,9 @@ class AlphaBetaChessTree:
                 elif i=="k":
                     pieces["bking"]+=1
             
-            res=pieces["wpawn"]+pieces["wknight"]*3+pieces["wbishop"]*3+pieces["wrook"]*5+pieces["wqueen"]*9+pieces["wking"]*39
-            -pieces["bpawn"]-pieces["bknight"]*3-pieces["bbishop"]*3-pieces["brook"]*5-pieces["bqueen"]*9-pieces["bking"]*39
-            return res
+        res=pieces["wpawn"]+pieces["wknight"]*3+pieces["wbishop"]*3+pieces["wrook"]*5+pieces["wqueen"]*9+pieces["wking"]*39
+        -pieces["bpawn"]-pieces["bknight"]*3-pieces["bbishop"]*3-pieces["brook"]*5-pieces["bqueen"]*9-pieces["bking"]*39
+        return res
 
                                     
 
@@ -159,7 +192,7 @@ class AlphaBetaChessTree:
         :param board: The board to visualize.
         :return: A visual representation of the board.
         """
-        
+        pass
 
     def visualize_decision_process(self, depth, move, notation="SAN"):
         """

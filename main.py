@@ -1,11 +1,26 @@
 from AlphaBetaChessTree import AlphaBetaChessTree
 
+import chess
+from TreeNode import TreeNode
 
 def main():
     fen = "4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk - 0 1"
+    fen="r1bq1rk1/ppp2ppp/2n5/1B6/1Q6/4P3/2N2PPP/R1B1K2R b KQ - 1 1"
     chess_tree = AlphaBetaChessTree(fen)
-    best = chess_tree.get_best_next_move(fen, 3)
+    #print(chess_tree.get_supported_evaluations())
+    #print(chess_tree.rboard)
+    #print (chess_tree._get_legal_moves(chess_tree.root))
 
+    #tboard=chess.Board(fen)
+    #tnd=TreeNode(tboard,True)
+    #print(tnd._board)
+    #print()
+    #chess_tree._apply_move(chess_tree._get_legal_moves(tnd)[0],tnd,"UCI")
+    #print(tnd._board)
+
+    #print(chess_tree._evaluate_board(chess_tree.rboard))
+
+    best = chess_tree.get_best_next_move(chess_tree.fenstr, 3)
     print("Best move:", best)
 
     # Please implement your own main function to test the AlphaBetaChessTree class.
